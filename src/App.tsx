@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 
 import { toast, Toaster } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
-import { Check, Loader2, Save, Trash, Undo } from 'lucide-react'
+import { BookOpenText, Check, Loader2, Plus, Save, Trash, Undo } from 'lucide-react'
 import clsx from 'clsx'
-import { open, exists, mkdir } from '@tauri-apps/plugin-fs';
+import { exists, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs';
 import * as path from '@tauri-apps/api/path';
 
 import './index.css'
@@ -83,20 +83,15 @@ export const App = () => {
       const filePathExists = await exists(filePath)
 
       if (filePathExists) {
-        const file = await open(filePath, { read: true })
-        const stat = await file.stat()
-        const buffer = new Uint8Array(stat.size)
-        await file.read(buffer)
-
-        const content = new TextDecoder().decode(buffer)
+        const content = await readTextFile(filePath)
 
         const todos = JSON.parse(content) as ITodo[]
-        
-        await file.close()
   
         setTodos(todos)
       }
     } catch (error) {
+      console.error(error)
+
       toast.error('Failed to load todos', {
         description: error instanceof Error ? error.message : String(error),
       })
@@ -117,9 +112,9 @@ export const App = () => {
         await mkdir(appDir, { recursive: true })
       }
 
-      const file = await open(filePath, { write: true, create: true })
-      await file.write(new TextEncoder().encode(JSON.stringify(todos)))
-      await file.close()
+      const content = JSON.stringify(todos)
+
+      await writeTextFile(filePath, content)
 
       setSaveStatus('saved')
       
@@ -142,51 +137,79 @@ export const App = () => {
   }, [])
 
   useEffect(() => {
-    setFilteredTodos(todos.filter((todo) => new Date(todo.date).toISOString().split('T')[0] === selectedDate))
+    if (todos.length > 0) {
+      setFilteredTodos(todos.filter((todo) => new Date(todo.date).toISOString().split('T')[0] === selectedDate))
+    }
   }, [selectedDate, todos])
 
   return (
     <div className="w-full min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 overflow-x-hidden">
       <Toaster richColors />
       <div className="max-w-[1200px] mx-auto w-[90%] py-10">
-        <div className="flex justify-end items-center gap-2">
-          {saveStatus === 'unsaved' && (<span className="text-xs text-amber-600">Não salvo</span>)}
-          {saveStatus === 'saving' && (<span className="text-xs">Salvando</span>)}
-          {saveStatus === 'saved' && (<span className="text-xs text-emerald-600">Salvo</span>)}
-          {saveStatus === 'error' && (<span className="text-xs text-rose-600">Erro ao salvar</span>)}
-          <button
-            className="bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-950 dark:text-zinc-50 border border-zinc-200 dark:border-zinc-800 rounded-lg p-2 transition-all cursor-pointer"
-            onClick={handleSaveTodos}
-          >
-            {saveStatus === 'saving' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          </button>
+        <div className="flex justify-between items-center gap-2">
+          <div className="flex items-center gap-2">
+            <BookOpenText className="w-8 h-8" />
+            <h1 className="text-3xl font-black leading-none -mt-1">TODOS</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={
+              clsx(
+                'text-xs font-black',
+                {
+                  'text-amber-600': saveStatus === 'unsaved',
+                  'text-zinc-500': saveStatus === 'saving',
+                  'text-emerald-600': saveStatus === 'saved',
+                  'text-rose-600': saveStatus === 'error',
+                }
+              )
+            }>
+              {saveStatus === 'unsaved' && 'NÃO SALVO'}
+              {saveStatus === 'saving' && 'SALVANDO'}
+              {saveStatus === 'saved' && 'SALVO'}
+              {saveStatus === 'error' && 'ERRO AO SALVAR'}
+            </span>
+            <button
+              className="bg-blue-500 hover:bg-blue-600 font-semibold text-white rounded-lg p-3 transition-all cursor-pointer"
+              onClick={handleSaveTodos}
+            >
+              {saveStatus === 'saving' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            </button>
+          </div>
         </div>
-        <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-          <label htmlFor="title">Nome da tarefa</label>
-          <input
-            id="title"
-            type="text"
-            className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2"
-            value={title}
-            onChange={handleTitleChange}
-          />
-          <button
-            type="submit"
-            className="border bg-blue-500 hover:bg-blue-600 font-semibold text-white rounded-lg p-2 transition-all cursor-pointer"
-          >
-            Adicionar
-          </button>
+        <form className="flex flex-col gap-2 mt-6" onSubmit={handleSubmit}>
+          <header>
+            <h2 className="text-2xl font-bold">Adicionar tarefa</h2>
+          </header>
+          <div className="flex gap-2">
+            <div className="flex-1 flex gap-2 items-center">
+              <label htmlFor="title">Nome da tarefa</label>
+              <input
+                id="title"
+                type="text"
+                className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 flex-1"
+                value={title}
+                onChange={handleTitleChange}
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 font-semibold text-white rounded-lg py-2 px-4 transition-all cursor-pointer w-full max-w-32 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Adicionar
+            </button>
+          </div>
         </form>
         <div className="mt-6 flex flex-col gap-2">
           <header className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">Tarefas</h2>
+            <h2 className="text-2xl font-bold">Tarefas</h2>
             <div className="flex items-center gap-2">
               <span>
                 {filteredTodos.length} tarefas
               </span>
               <input 
                 type="date"
-                className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2"
+                className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 text-zinc-950 dark:text-zinc-50"
                 value={selectedDate}
                 onChange={handleSelectedDateChange}
               />
@@ -199,7 +222,7 @@ export const App = () => {
                 className={
                   clsx(
                     'group flex items-center gap-2 justify-between px-4 py-2 rounded-lg border',
-                    { 'bg-emerald-200 border-emerald-500 text-emerald-500 opacity-70': todo.completed },
+                    { 'bg-emerald-200 dark:bg-emerald-900 border-emerald-500 text-emerald-500': todo.completed },
                     { 'bg-zinc-100 dark:bg-zinc-900 border-zinc-600 dark:border-zinc-800 text-zinc-600 dark:text-zinc-50': !todo.completed },
                   )
                 }
@@ -211,8 +234,8 @@ export const App = () => {
                     className={
                       clsx(
                         'rounded-lg p-2 transition-all cursor-pointer border',
-                        { 'bg-zinc-300 hover:bg-zinc-950 border-zinc-950 text-zinc-950 hover:text-zinc-300': todo.completed },
-                        { 'bg-emerald-200 hover:bg-emerald-500 border-emerald-500 text-emerald-500 hover:text-emerald-200': !todo.completed },
+                        { 'bg-zinc-300 dark:bg-zinc-900 hover:bg-zinc-500 border-zinc-500 text-zinc-500 hover:text-zinc-300': todo.completed },
+                        { 'bg-emerald-200 dark:bg-emerald-900 hover:bg-emerald-500 border-emerald-500 text-emerald-500 hover:text-emerald-200': !todo.completed },
                       )
                     }
                     onClick={() => handleCompleteTodo(todo.id)}
@@ -220,7 +243,7 @@ export const App = () => {
                     {todo.completed ? <Undo className="w-4 h-4" /> : <Check className="w-4 h-4" />}
                   </button>
                   <button
-                    className="border bg-rose-200 hover:bg-rose-500 border-rose-500 text-rose-500 hover:text-rose-200 rounded-lg p-2 transition-all cursor-pointer"
+                    className="border bg-rose-200 dark:bg-rose-900 hover:bg-rose-500 border-rose-500 text-rose-500 hover:text-rose-200 rounded-lg p-2 transition-all cursor-pointer"
                     onClick={() => handleDeleteTodo(todo.id)}
                   >
                     <Trash className="w-4 h-4" />
