@@ -146,7 +146,7 @@ export const App = () => {
   }, [selectedDate, todos])
 
   return (
-    <div className="w-screen h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50">
+    <div className="w-full min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 overflow-x-hidden">
       <Toaster richColors />
       <div className="max-w-[1200px] mx-auto w-[90%] py-10">
         <div className="flex justify-end items-center gap-2">
