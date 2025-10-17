@@ -8,6 +8,27 @@
   "permissions": [
     "core:default",
     "opener:default",
-    "fs:default"
+    "fs:default",
+    "fs:allow-appdata-read",
+    "fs:allow-appdata-read-recursive",
+    "fs:allow-appdata-write",
+    "fs:allow-appdata-write-recursive",
+    "fs:allow-mkdir",
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [
+        {
+          "path": "$APPDATA/**/todos.json"
+        }
+      ]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [
+        {
+          "path": "$APPDATA/**/todos.json"
+        }
+      ]
+    }
   ]
 }

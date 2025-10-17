@@ -4,10 +4,11 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "NO_AT_BRIDGE=1 vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "tauri:dev": "NO_AT_BRIDGE=1 tauri dev"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
