@@ -1,24 +1,15 @@
 import * as path from '@tauri-apps/api/path'
 import { exists, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
 import clsx from 'clsx'
-import { BookOpenText, Check, Loader2, Plus, Save, Trash, Undo } from 'lucide-react'
-import { useCallback, useEffect, useId, useState } from 'react'
+import { BookOpenText, Check, Loader2, Pencil, Plus, Save, Trash, Undo } from 'lucide-react'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { Toaster, toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
 
 import { Container } from '@/components/Container'
+import { EditTodo } from '@/components/EditTodo'
 
 import './index.css'
-
-interface ITodo {
-	id: string
-	title: string
-	description: string
-	completed: boolean
-	date: string
-	createdAt: string
-	updatedAt: string
-}
 
 export const App = () => {
 	const [todos, setTodos] = useState<ITodo[]>([])
@@ -26,6 +17,9 @@ export const App = () => {
 	const [saveStatus, setSaveStatus] = useState<'idle' | 'unsaved' | 'saving' | 'saved' | 'error'>('idle')
 	const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0])
 	const [filteredTodos, setFilteredTodos] = useState<ITodo[]>([])
+	const [editingTodoId, setEditingTodoId] = useState<string | null>(null)
+
+	const editingTodo = useMemo(() => todos.find((todo) => todo.id === editingTodoId), [todos, editingTodoId])
 
 	const titleInputId = useId()
 
@@ -133,6 +127,19 @@ export const App = () => {
 		setSelectedDate(event.target.value)
 	}
 
+	const handleEditTodo = (id: string) => {
+		setEditingTodoId(id)
+	}
+
+	const onCloseEditTodo = () => {
+		setEditingTodoId(null)
+	}
+
+	const onSaveEditTodo = ({ updatedTodo }: { updatedTodo: ITodo }) => {
+		setTodos((prevTodos) => prevTodos.map((todo) => (todo.id === updatedTodo.id ? updatedTodo : todo)))
+		setSaveStatus('unsaved')
+	}
+
 	useEffect(() => {
 		handleLoadTodos()
 	}, [handleLoadTodos])
@@ -144,8 +151,9 @@ export const App = () => {
 	}, [selectedDate, todos])
 
 	return (
-		<div className="w-full min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 overflow-x-hidden">
+		<div className="relative w-full min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 overflow-x-hidden">
 			<Toaster richColors />
+			{editingTodo && <EditTodo todo={editingTodo} onClose={onCloseEditTodo} onSave={onSaveEditTodo} />}
 			<Container>
 				<div className="flex justify-between items-center gap-2">
 					<div className="flex items-center gap-2">
@@ -229,7 +237,7 @@ export const App = () => {
 							>
 								<span className={clsx('flex-1', todo.completed ? 'line-through' : '')}>{todo.title}</span>
 								<span className="text-xs text-zinc-500">{todo.date}</span>
-								<div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 w-0 group-hover:w-[10%] scale-0 group-hover:scale-100 transition-all">
+								<div className="flex items-center gap-2 group-hover:opacity-100 group-hover:scale-100 transition-all">
 									<button
 										type="button"
 										className={clsx(
@@ -246,6 +254,13 @@ export const App = () => {
 										onClick={() => handleCompleteTodo(todo.id)}
 									>
 										{todo.completed ? <Undo className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+									</button>
+									<button
+										type="button"
+										className="rounded-lg p-2 transition-all cursor-pointer border bg-zinc-300 dark:bg-zinc-900 hover:bg-zinc-500 border-zinc-500 text-zinc-500 hover:text-zinc-300"
+										onClick={() => handleEditTodo(todo.id)}
+									>
+										<Pencil className="w-4 h-4" />
 									</button>
 									<button
 										type="button"
