@@ -1,19 +1,25 @@
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import { X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { BackgroundOverlay } from './BackgroundOverlay'
 
 interface IEditTodoProps {
 	todo: ITodo
 	onClose: () => void
+	onSave: ({ updatedTodo }: { updatedTodo: ITodo }) => void
 }
 
 export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) => {
 	const [title, setTitle] = useState(todo.title)
 	const [description, setDescription] = useState(todo.description)
+	const [date, setDate] = useState(todo.date)
 
 	const handleInitialFieldValues = useCallback((todo: ITodo) => {
 		setTitle(todo.title)
 		setDescription(todo.description)
+		setDate(todo.date)
 	}, [])
 
 	const handleOnClose = () => {
@@ -23,15 +29,23 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) =>
 	const handleOnCancel = () => handleOnClose()
 
 	const handleOnSave = () => {
-		const updatedTodo: ITodo = {
-			...todo,
-			title,
-			description,
+		try {
+			const updatedTodo: ITodo = {
+				...todo,
+				title,
+				description,
+				updatedAt: new Date().toISOString(),
+			}
+
+			onSave({ updatedTodo })
+
+			toast.success('Atualização salva com sucesso')
+			onClose()
+		} catch (error) {
+			toast.error('Erro ao salvar atualização', {
+				description: error instanceof Error ? error.message : String(error),
+			})
 		}
-
-		onSave({ updatedTodo })
-
-		onClose()
 	}
 
 	const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -52,11 +66,18 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) =>
 					</button>
 				</header>
 				<div className="flex flex-col gap-2 mt-4">
-					<textarea
-						className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 flex-1"
-						value={description}
-						onChange={handleDescriptionChange}
-					/>
+					{/* TODO: Corrigir redução de 3 horas do GMT */}
+					<p>Data: {format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+					<p>Última atualização: {format(new Date(todo.updatedAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+
+					<label className="flex flex-col gap-2">
+						<span>Descrição</span>
+						<textarea
+							className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 flex-1"
+							value={description}
+							onChange={handleDescriptionChange}
+						/>
+					</label>
 				</div>
 				<footer className="flex items-center justify-end gap-2 mt-4">
 					<button

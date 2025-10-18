@@ -47,7 +47,7 @@ export const App = () => {
 
 			setSaveStatus('unsaved')
 		} catch (error) {
-			toast.error('Failed to add todo', {
+			toast.error('Erro ao adicionar tarefa', {
 				description: error instanceof Error ? error.message : String(error),
 			})
 		}
@@ -87,7 +87,7 @@ export const App = () => {
 		} catch (error) {
 			console.error(error)
 
-			toast.error('Failed to load todos', {
+			toast.error('Erro ao carregar tarefas', {
 				description: error instanceof Error ? error.message : String(error),
 			})
 		}
@@ -113,9 +113,9 @@ export const App = () => {
 
 			setSaveStatus('saved')
 
-			toast.success('Todos saved successfully')
+			toast.success('Tarefas salvas com sucesso')
 		} catch (error) {
-			toast.error('Failed to save todos', {
+			toast.error('Erro ao salvar tarefas', {
 				description: error instanceof Error ? error.message : String(error),
 			})
 
@@ -152,7 +152,7 @@ export const App = () => {
 
 	return (
 		<div className="relative w-full min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 overflow-x-hidden">
-			<Toaster richColors />
+			<Toaster richColors expand closeButton />
 			{editingTodo && <EditTodo todo={editingTodo} onClose={onCloseEditTodo} onSave={onSaveEditTodo} />}
 			<Container>
 				<div className="flex justify-between items-center gap-2">
@@ -236,8 +236,7 @@ export const App = () => {
 								)}
 							>
 								<span className={clsx('flex-1', todo.completed ? 'line-through' : '')}>{todo.title}</span>
-								<span className="text-xs text-zinc-500">{todo.date}</span>
-								<div className="flex items-center gap-2 group-hover:opacity-100 group-hover:scale-100 transition-all">
+								<div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all">
 									<button
 										type="button"
 										className={clsx(
