@@ -1,12 +1,14 @@
 import * as path from '@tauri-apps/api/path'
 import { exists, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
 import clsx from 'clsx'
+// import { BookOpenText, Check, Loader2, Pencil, Plus, Save, Trash, Undo } from 'lucide-react'
 import { BookOpenText, Check, Loader2, Pencil, Plus, Save, Trash, Undo } from 'lucide-react'
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { Toaster, toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
 
 import { Container } from '@/components/Container'
+import { Dates } from '@/components/Dates'
 import { EditTodo } from '@/components/EditTodo'
 
 import './index.css'
@@ -220,7 +222,9 @@ export const App = () => {
 							/>
 						</div>
 					</header>
-					<ul className="border border-red-500 flex flex-col gap-2 ">
+					<Dates todos={todos} />
+					{/* day view */}
+					{/* <ul className="flex flex-col gap-2 ">
 						{filteredTodos.map((todo) => (
 							<li
 								key={todo.id}
@@ -271,7 +275,7 @@ export const App = () => {
 								</div>
 							</li>
 						))}
-					</ul>
+					</ul> */}
 				</div>
 			</Container>
 		</div>
