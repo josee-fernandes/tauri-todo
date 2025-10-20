@@ -220,7 +220,7 @@ export const App = () => {
 							/>
 						</div>
 					</header>
-					<ul className="flex flex-col gap-2 ">
+					<ul className="border border-red-500 flex flex-col gap-2 ">
 						{filteredTodos.map((todo) => (
 							<li
 								key={todo.id}

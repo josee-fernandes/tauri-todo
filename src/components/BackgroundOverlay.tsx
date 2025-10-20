@@ -6,6 +6,7 @@ interface IBackgroundOverlayProps {
 }
 
 export const BackgroundOverlay = forwardRef<HTMLDivElement, IBackgroundOverlayProps>(({ children, ...props }, ref) => {
+	// @ts-expect-error - className is not defined in the props
 	const { className, ...rest } = props
 
 	const _class = clsx('fixed w-screen h-screen top-0 left-0 bg-black/30 backdrop-blur-lg z-50', className)

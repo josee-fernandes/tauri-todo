@@ -57,8 +57,9 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) =>
 	}, [todo, handleInitialFieldValues])
 
 	return (
+		// @ts-expect-error - className is not defined in the props
 		<BackgroundOverlay className="grid place-items-center">
-			<div className="max-w-3xl w-[90%] py-4 px-6 background-zinc-900 border border-zinc-800 rounded-lg">
+			<div className="max-w-3xl w-[90%] py-4 px-6 bg-zinc-950 border border-zinc-800 rounded-lg">
 				<header className="flex items-center justify-between">
 					<h2>{title}</h2>
 					<button type="button" className="cursor-pointer" onClick={handleOnClose}>
