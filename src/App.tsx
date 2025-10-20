@@ -222,7 +222,7 @@ export const App = () => {
 							/>
 						</div>
 					</header>
-					<Dates todos={todos} />
+					<Dates todos={todos} onUpdate={onSaveEditTodo} onEditTodo={handleEditTodo} />
 					{/* day view */}
 					{/* <ul className="flex flex-col gap-2 ">
 						{filteredTodos.map((todo) => (

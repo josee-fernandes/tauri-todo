@@ -1,74 +1,122 @@
-import { DndContext, type DragEndEvent, DragOverlay, type DragStartEvent, type UniqueIdentifier } from '@dnd-kit/core'
-import { Splide, SplideSlide, SplideTrack } from '@splidejs/react-splide'
-import { getDate, getDaysInMonth } from 'date-fns'
-import { useEffect, useMemo, useState } from 'react'
+import {
+	DndContext,
+	type DragEndEvent,
+	DragOverlay,
+	type DragStartEvent,
+	MouseSensor,
+	TouchSensor,
+	type UniqueIdentifier,
+	useSensor,
+	useSensors,
+} from '@dnd-kit/core'
+import clsx from 'clsx'
+import { format, formatISO, getDate, getDaysInMonth, setDate } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import useEmblaCarousel from 'embla-carousel-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Draggable } from './Draggable'
 import { Droppable } from './Droppable'
-
-// @ts-expect-error no types for this package
-import '@splidejs/react-splide/css'
 
 interface IDatesCProps {
 	activeDraggableId: UniqueIdentifier | null
 	droppables: Record<string, ITodo[]>
 	todos: ITodo[]
+	onEditTodo: (id: string) => void
 }
 
-const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos }) => {
+const today = new Date()
+
+const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, onEditTodo }) => {
+	const [emblaRef] = useEmblaCarousel({
+		startIndex: getDate(today) - 1,
+		slidesToScroll: 'auto',
+		loop: false,
+		watchSlides: false,
+	})
+
 	const activeTodo = useMemo(() => {
 		return todos.find((todo) => todo.id === activeDraggableId)
 	}, [activeDraggableId, todos])
 
+	const emblaRefElement = useRef<HTMLDivElement>(null)
+
+	const handleEditTodo = (id: string) => {
+		onEditTodo(id)
+	}
+
+	useEffect(() => {
+		if (emblaRefElement.current) {
+			if (activeDraggableId) {
+				emblaRefElement.current.style.pointerEvents = 'none'
+			} else {
+				emblaRefElement.current.style.pointerEvents = 'auto'
+			}
+		}
+	}, [activeDraggableId])
+
 	return (
-		<div className="h-full max-h-96 text-white flex gap-4 overflow-x-auto">
+		<div className=" h-full text-white flex gap-4 overflow-x-auto">
 			<DragOverlay>
 				{activeDraggableId ? (
 					<Draggable id={activeDraggableId}>
-						<p className="min-h-[50px] h-max w-full bg-blue-500 flex items-center justify-center p-2 rounded-lg">
+						<p className="min-h-[50px] h-max w-full bg-blue-500 flex items-center justify-center p-2 rounded-lg cursor-grabbing">
 							{activeTodo?.title}
 						</p>
 					</Draggable>
 				) : null}
 			</DragOverlay>
 
-			<div className="flex-1 relative w-full">
-				<Splide
-					aria-label="Dates"
-					options={{
-						perPage: 7,
-						snap: true,
-						wheel: false,
-						gap: '1rem',
-						height: '384px',
-						drag: activeDraggableId ? false : 'free',
+			<div className="embla h-full w-full">
+				<div
+					ref={(node) => {
+						emblaRef(node)
+						emblaRefElement.current = node
 					}}
+					className="embla__viewport overflow-hidden"
 				>
-					{Object.keys(droppables).map((id) => (
-						<SplideSlide key={id}>
-							<Droppable id={id}>
-								<p className="font-bold mb-1">Col {id}</p>
-								<div className="flex flex-col gap-1 w-full overflow-y-auto overflow-x-hidden p-2">
-									<div className="opacity-0 w-full"></div>
-									{droppables[id].map((todo) =>
-										activeDraggableId === todo.id ? null : (
-											<Draggable key={todo.id} id={todo.id}>
-												<p className="min-h-[50px] h-max w-full bg-blue-500 flex items-center justify-center p-2 rounded-lg">
-													{todo.title}
-												</p>
-											</Draggable>
-										),
-									)}
-									{droppables[id].length === 0 && (
-										<p className="h-[50px] w-full border border-gray-500  text-gray-500 flex items-center justify-center rounded-lg">
-											Nenhum item
-										</p>
-									)}
-								</div>
-							</Droppable>
-						</SplideSlide>
-					))}
-				</Splide>
+					<div className="embla__container flex gap-2">
+						{Object.keys(droppables).map((id) => (
+							<div key={id} className="embla__slide min-w-60 w-60">
+								<Droppable id={id}>
+									<p
+										className={clsx('text-sm text-zinc-500', {
+											'!text-blue-500': formatISO(setDate(today, Number(id))) === formatISO(today.toISOString()),
+										})}
+									>
+										{format(setDate(today, Number(id)), 'EEEE', { locale: ptBR })}
+									</p>
+									<p className="font-bold mb-1">{format(setDate(today, Number(id)), 'dd/MM')}</p>
+									<div className="flex flex-col gap-1 w-full overflow-y-auto overflow-x-hidden p-2">
+										<div className="opacity-0 w-full"></div>
+										{droppables[id].map((todo) =>
+											activeDraggableId === todo.id ? null : (
+												<Draggable key={todo.id} id={todo.id} onClick={() => handleEditTodo(todo.id)}>
+													<p
+														className={clsx(
+															'min-h-[50px] h-max w-full bg-blue-500 flex items-center justify-center p-2 rounded-lg cursor-pointer',
+															{
+																'bg-emerald-200 dark:bg-emerald-900 border-emerald-500 text-emerald-500':
+																	todo.completed,
+															},
+														)}
+													>
+														{todo.title}
+													</p>
+												</Draggable>
+											),
+										)}
+										{droppables[id].length === 0 && (
+											<p className="h-[50px] w-full  text-gray-500 flex items-center justify-center rounded-lg">
+												Nenhum item
+											</p>
+										)}
+									</div>
+								</Droppable>
+							</div>
+						))}
+					</div>
+				</div>
 			</div>
 		</div>
 	)
@@ -76,13 +124,26 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos }
 
 interface IDatesProps {
 	todos: ITodo[]
+	onUpdate: ({ updatedTodo }: { updatedTodo: ITodo }) => void
+	onEditTodo: (id: string) => void
 }
 
-export const Dates: React.FC<IDatesProps> = ({ todos }) => {
+export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo }) => {
+	const mouseSensor = useSensor(MouseSensor, {
+		activationConstraint: {
+			distance: 10,
+		},
+	})
+	const touchSensor = useSensor(TouchSensor, {
+		activationConstraint: {
+			distance: 10,
+		},
+	})
+
 	const [activeDraggableId, setActiveDraggableId] = useState<string | null>(null)
 
+	const sensors = useSensors(mouseSensor, touchSensor)
 	const days = getDaysInMonth(new Date())
-
 	const initialDroppables = new Array(days)
 		.fill(0)
 		.map((_, index) => index + 1)
@@ -133,6 +194,17 @@ export const Dates: React.FC<IDatesProps> = ({ todos }) => {
 			return next
 		})
 
+		const todo = todos.find((todo) => todo.id === active.id.toString())
+
+		if (todo) {
+			const updatedTodo = {
+				...todo,
+				date: setDate(new Date(todo.date), Number(targetId)).toISOString(),
+			}
+
+			onUpdate({ updatedTodo })
+		}
+
 		setActiveDraggableId(null)
 	}
 
@@ -153,8 +225,8 @@ export const Dates: React.FC<IDatesProps> = ({ todos }) => {
 	}, [todos, days])
 
 	return (
-		<DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-			<DatesC activeDraggableId={activeDraggableId} droppables={droppables} todos={todos} />
+		<DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+			<DatesC activeDraggableId={activeDraggableId} droppables={droppables} todos={todos} onEditTodo={onEditTodo} />
 		</DndContext>
 	)
 }

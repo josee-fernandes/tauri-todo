@@ -3,13 +3,14 @@ import { type UniqueIdentifier, useDraggable } from '@dnd-kit/core'
 interface IDraggableProps {
 	children?: React.ReactNode
 	id: UniqueIdentifier
+	onClick?: () => void
 }
 
-export const Draggable: React.FC<IDraggableProps> = ({ children, id }) => {
+export const Draggable: React.FC<IDraggableProps> = ({ children, id, onClick }) => {
 	const { attributes, listeners, setNodeRef } = useDraggable({ id })
 
 	return (
-		<button ref={setNodeRef} type="button" {...listeners} {...attributes}>
+		<button ref={setNodeRef} type="button" className="w-full" {...listeners} {...attributes} onClick={onClick}>
 			{children}
 		</button>
 	)
