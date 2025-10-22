@@ -1,11 +1,11 @@
 import * as path from '@tauri-apps/api/path'
 import { exists, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
 import clsx from 'clsx'
+import { format, formatISO } from 'date-fns'
 import { BookOpenText, Loader2, Plus, Save } from 'lucide-react'
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
-
 import { Container } from '@/components/Container'
 import { Dates } from '@/components/Dates'
 import { EditTodo } from '@/components/EditTodo'
@@ -14,7 +14,7 @@ export const Home: React.FC = () => {
 	const [todos, setTodos] = useState<ITodo[]>([])
 	const [title, setTitle] = useState('')
 	const [saveStatus, setSaveStatus] = useState<'idle' | 'unsaved' | 'saving' | 'saved' | 'error'>('idle')
-	const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0])
+	const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'))
 	const [filteredTodos, setFilteredTodos] = useState<ITodo[]>([])
 	const [editingTodoId, setEditingTodoId] = useState<string | null>(null)
 
@@ -35,7 +35,7 @@ export const Home: React.FC = () => {
 				title,
 				description: '',
 				completed: false,
-				date: new Date(selectedDate).toISOString(),
+				date: new Date(`${selectedDate}T00:00:00.000`).toISOString(),
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			}

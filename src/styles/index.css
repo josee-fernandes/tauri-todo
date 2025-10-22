@@ -6,8 +6,8 @@
 
 .animate-delay-scale-in {
   transform: scale(0);
-  animation: scale-animation 300ms cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
-  animation-delay: 200ms;
+  animation: scale-animation 150ms cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+  animation-delay: 100ms;
 }
 
 .animate-scale-in {
