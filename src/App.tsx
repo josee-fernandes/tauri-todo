@@ -2,7 +2,7 @@ import * as path from '@tauri-apps/api/path'
 import { exists, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
 import clsx from 'clsx'
 // import { BookOpenText, Check, Loader2, Pencil, Plus, Save, Trash, Undo } from 'lucide-react'
-import { BookOpenText, Check, Loader2, Pencil, Plus, Save, Trash, Undo } from 'lucide-react'
+import { BookOpenText, Loader2, Plus, Save } from 'lucide-react'
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { Toaster, toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
@@ -142,6 +142,10 @@ export const App = () => {
 		setSaveStatus('unsaved')
 	}
 
+	const onDeleteTodo = (id: string) => {
+		handleDeleteTodo(id)
+	}
+
 	useEffect(() => {
 		handleLoadTodos()
 	}, [handleLoadTodos])
@@ -155,8 +159,10 @@ export const App = () => {
 	return (
 		<div className="relative w-full min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50 overflow-x-hidden">
 			<Toaster richColors expand closeButton />
-			{editingTodo && <EditTodo todo={editingTodo} onClose={onCloseEditTodo} onSave={onSaveEditTodo} />}
-			<Container>
+			{editingTodo && (
+				<EditTodo todo={editingTodo} onClose={onCloseEditTodo} onSave={onSaveEditTodo} onDelete={onDeleteTodo} />
+			)}
+			<Container className="h-screen flex flex-col">
 				<div className="flex justify-between items-center gap-2">
 					<div className="flex items-center gap-2">
 						<BookOpenText className="w-8 h-8" />
@@ -209,7 +215,7 @@ export const App = () => {
 						</button>
 					</div>
 				</form>
-				<div className="mt-6 flex flex-col gap-2">
+				<div className="mt-6 flex flex-col gap-2 flex-1">
 					<header className="flex items-center justify-between">
 						<h2 className="text-2xl font-bold">Tarefas</h2>
 						<div className="flex items-center gap-2">

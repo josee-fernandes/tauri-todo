@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Check, X } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { X } from 'lucide-react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { BackgroundOverlay } from './BackgroundOverlay'
 
@@ -9,20 +9,14 @@ interface IEditTodoProps {
 	todo: ITodo
 	onClose: () => void
 	onSave: ({ updatedTodo }: { updatedTodo: ITodo }) => void
+	onDelete: (id: string) => void
 }
 
-export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) => {
+export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDelete }) => {
 	const [title] = useState(todo.title)
 	const [description, setDescription] = useState(todo.description)
 	const [date] = useState(todo.date)
 	const [completed, setCompleted] = useState(todo.completed)
-
-	// const handleInitialFieldValues = useCallback((todo: ITodo) => {
-	// 	setTitle(todo.title)
-	// 	setDescription(todo.description)
-	// 	setDate(todo.date)
-	// 	setCompleted(todo.completed)
-	// }, [])
 
 	const handleOnClose = () => {
 		onClose()
@@ -46,6 +40,16 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) =>
 			onClose()
 		} catch (error) {
 			toast.error('Erro ao salvar atualização', {
+				description: error instanceof Error ? error.message : String(error),
+			})
+		}
+	}
+
+	const handleOnDelete = () => {
+		try {
+			onDelete(todo.id)
+		} catch (error) {
+			toast.error('Erro ao apagar tarefa', {
 				description: error instanceof Error ? error.message : String(error),
 			})
 		}
@@ -97,6 +101,13 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) =>
 						onClick={handleOnCancel}
 					>
 						Cancelar
+					</button>
+					<button
+						type="button"
+						className="bg-rose-500 hover:bg-rose-600 font-semibold text-white rounded-lg py-2 px-4 transition-all cursor-pointer"
+						onClick={handleOnDelete}
+					>
+						Apagar
 					</button>
 					<button
 						type="button"

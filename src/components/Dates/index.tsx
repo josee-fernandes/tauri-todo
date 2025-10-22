@@ -66,7 +66,7 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 	}, [activeDraggableId])
 
 	return (
-		<div className=" h-full text-white flex gap-4 overflow-x-auto">
+		<div className="flex-1 text-white flex gap-4 overflow-x-auto">
 			<DragOverlay>
 				{activeDraggableId ? (
 					<Draggable id={activeDraggableId}>
@@ -77,15 +77,15 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 				) : null}
 			</DragOverlay>
 
-			<div className="embla h-full w-full">
+			<div className="embla w-full">
 				<div
 					ref={(node) => {
 						emblaRef(node)
 						emblaRefElement.current = node
 					}}
-					className="embla__viewport overflow-hidden"
+					className="embla__viewport overflow-hidden h-full"
 				>
-					<div className="embla__container flex gap-2">
+					<div className="embla__container flex gap-2 h-full">
 						{Object.keys(droppables).map((id) => (
 							<div key={id} className="embla__slide min-w-60 w-60">
 								<Droppable id={id}>
@@ -143,13 +143,13 @@ interface IDatesProps {
 export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo }) => {
 	const mouseSensor = useSensor(MouseSensor, {
 		activationConstraint: {
-			delay: 50,
+			delay: 100,
 			tolerance: 5,
 		},
 	})
 	const touchSensor = useSensor(TouchSensor, {
 		activationConstraint: {
-			delay: 50,
+			delay: 100,
 			tolerance: 5,
 		},
 	})
