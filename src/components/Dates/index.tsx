@@ -70,7 +70,14 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 			<DragOverlay>
 				{activeDraggableId ? (
 					<Draggable id={activeDraggableId}>
-						<p className="min-h-[50px] h-max w-full bg-blue-500 flex items-center justify-center p-2 rounded-lg cursor-grabbing">
+						<p
+							className={clsx(
+								'min-h-[50px] h-max w-full bg-blue-500 flex items-center justify-center p-2 rounded-lg cursor-grabbing',
+								{
+									'bg-emerald-200 dark:bg-emerald-900 border-emerald-500 text-emerald-500': activeTodo?.completed,
+								},
+							)}
+						>
 							{activeTodo?.title}
 						</p>
 					</Draggable>
