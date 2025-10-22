@@ -69,8 +69,8 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 
 	return (
 		// @ts-expect-error - className is not defined in the props
-		<BackgroundOverlay className="grid place-items-center">
-			<div className="max-w-3xl w-[90%] py-4 px-6 bg-zinc-950 border border-zinc-800 rounded-lg">
+		<BackgroundOverlay className="grid place-items-center animate-opacity-in">
+			<div className="max-w-3xl w-[90%] py-4 px-6 bg-zinc-950 border border-zinc-800 rounded-lg animate-delay-scale-in">
 				<header className="flex items-center justify-between gap-4">
 					<input
 						type="text"

@@ -12,7 +12,6 @@ export const TitleBar: React.FC = () => {
 	const closeButtonId = useId()
 
 	const handleMinimize = () => {
-		console.log('minimize')
 		appWindow.minimize()
 	}
 
