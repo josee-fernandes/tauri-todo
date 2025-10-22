@@ -13,6 +13,7 @@ import clsx from 'clsx'
 import { format, formatISO, getDate, getDaysInMonth, setDate } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import useEmblaCarousel from 'embla-carousel-react'
+import { Plus } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Draggable } from './Draggable'
@@ -23,11 +24,12 @@ interface IDatesCProps {
 	droppables: Record<string, ITodo[]>
 	todos: ITodo[]
 	onEditTodo: (id: string) => void
+	onCreateNewTodo: ({ date }: { date: Date }) => void
 }
 
 const today = new Date()
 
-const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, onEditTodo }) => {
+const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, onEditTodo, onCreateNewTodo }) => {
 	const [emblaRef] = useEmblaCarousel({
 		startIndex: getDate(today) - 1,
 		dragFree: true,
@@ -53,6 +55,12 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 
 	const handleEditTodo = (id: string) => {
 		onEditTodo(id)
+	}
+
+	const handleCreateNewTodo = ({ date }: { date: string }) => {
+		const _date = setDate(new Date(), Number(date))
+
+		onCreateNewTodo({ date: _date })
 	}
 
 	useEffect(() => {
@@ -104,8 +112,14 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 										{format(setDate(today, Number(id)), 'EEEE', { locale: ptBR })}
 									</p>
 									<p className="font-bold mb-1">{format(setDate(today, Number(id)), 'dd/MM')}</p>
-									<div className="flex flex-col gap-1 w-full overflow-y-auto overflow-x-hidden p-2">
+									<div className="group flex flex-col gap-1 w-full h-full overflow-y-auto overflow-x-hidden p-2">
 										<div className="opacity-0 w-full"></div>
+										{droppables[id].length === 0 && (
+											<p className="h-[50px] w-full  text-gray-500 flex items-center justify-center rounded-lg">
+												Nenhum item
+											</p>
+										)}
+
 										{droppables[id].map((todo) =>
 											activeDraggableId === todo.id ? null : (
 												<Draggable key={todo.id} id={todo.id} onClick={() => handleEditTodo(todo.id)}>
@@ -123,11 +137,20 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 												</Draggable>
 											),
 										)}
-										{droppables[id].length === 0 && (
-											<p className="h-[50px] w-full  text-gray-500 flex items-center justify-center rounded-lg">
-												Nenhum item
+
+										<button
+											type="button"
+											className="w-full group-hover:opacity-100 opacity-0 transition-all"
+											onClick={() => handleCreateNewTodo({ date: id })}
+										>
+											<p
+												className={clsx(
+													'min-h-[50px] h-max w-full bg-zinc-300 dark:bg-zinc-900 hover:bg-zinc-500 border-zinc-500 text-zinc-500 hover:text-zinc-300 flex items-center justify-center p-2 rounded-lg cursor-pointer transition-all',
+												)}
+											>
+												<Plus className="w-4 h-4" />
 											</p>
-										)}
+										</button>
 									</div>
 								</Droppable>
 							</div>
@@ -145,9 +168,10 @@ interface IDatesProps {
 	todos: ITodo[]
 	onUpdate: ({ updatedTodo }: { updatedTodo: ITodo }) => void
 	onEditTodo: (id: string) => void
+	onCreateNewTodo: ({ date }: { date: Date }) => void
 }
 
-export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo }) => {
+export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo, onCreateNewTodo }) => {
 	const mouseSensor = useSensor(MouseSensor, {
 		activationConstraint: {
 			delay: 100,
@@ -250,7 +274,13 @@ export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo }) =>
 
 	return (
 		<DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-			<DatesC activeDraggableId={activeDraggableId} droppables={droppables} todos={todos} onEditTodo={onEditTodo} />
+			<DatesC
+				activeDraggableId={activeDraggableId}
+				droppables={droppables}
+				todos={todos}
+				onEditTodo={onEditTodo}
+				onCreateNewTodo={onCreateNewTodo}
+			/>
 		</DndContext>
 	)
 }

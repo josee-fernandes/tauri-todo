@@ -55,10 +55,10 @@ export const App = () => {
 		}
 	}
 
-	const handleCompleteTodo = (id: string) => {
-		setTodos((prevTodos) => prevTodos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)))
-		setSaveStatus('unsaved')
-	}
+	// const handleCompleteTodo = (id: string) => {
+	// 	setTodos((prevTodos) => prevTodos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)))
+	// 	setSaveStatus('unsaved')
+	// }
 
 	const handleDeleteTodo = (id: string) => {
 		setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id))
@@ -146,6 +146,28 @@ export const App = () => {
 		handleDeleteTodo(id)
 	}
 
+	const onCreateNewTodo = ({ date }: { date: Date }) => {
+		try {
+			const newTodo: ITodo = {
+				id: uuidv4(),
+				title: 'Nova tarefa',
+				description: '',
+				completed: false,
+				date: date.toISOString(),
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+			}
+
+			setTodos((prevTodos) => [...prevTodos, newTodo])
+
+			setSaveStatus('unsaved')
+		} catch (error) {
+			toast.error('Erro ao criar nova tarefa', {
+				description: error instanceof Error ? error.message : String(error),
+			})
+		}
+	}
+
 	useEffect(() => {
 		handleLoadTodos()
 	}, [handleLoadTodos])
@@ -228,7 +250,12 @@ export const App = () => {
 							/>
 						</div>
 					</header>
-					<Dates todos={todos} onUpdate={onSaveEditTodo} onEditTodo={handleEditTodo} />
+					<Dates
+						todos={todos}
+						onUpdate={onSaveEditTodo}
+						onEditTodo={handleEditTodo}
+						onCreateNewTodo={onCreateNewTodo}
+					/>
 					{/* day view */}
 					{/* <ul className="flex flex-col gap-2 ">
 						{filteredTodos.map((todo) => (

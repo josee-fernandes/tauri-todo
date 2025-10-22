@@ -13,7 +13,7 @@ interface IEditTodoProps {
 }
 
 export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDelete }) => {
-	const [title] = useState(todo.title)
+	const [title, setTitle] = useState(todo.title)
 	const [description, setDescription] = useState(todo.description)
 	const [date] = useState(todo.date)
 	const [completed, setCompleted] = useState(todo.completed)
@@ -55,6 +55,10 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 		}
 	}
 
+	const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setTitle(event.target.value)
+	}
+
 	const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
 		setDescription(event.target.value)
 	}
@@ -67,9 +71,18 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 		// @ts-expect-error - className is not defined in the props
 		<BackgroundOverlay className="grid place-items-center">
 			<div className="max-w-3xl w-[90%] py-4 px-6 bg-zinc-950 border border-zinc-800 rounded-lg">
-				<header className="flex items-center justify-between">
-					<h2>{title}</h2>
-					<button type="button" className="cursor-pointer" onClick={handleOnClose}>
+				<header className="flex items-center justify-between gap-4">
+					<input
+						type="text"
+						className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 w-full"
+						value={title}
+						onChange={handleTitleChange}
+					/>
+					<button
+						type="button"
+						className="cursor-pointer border rounded-lg p-2 border-zinc-300 dark:border-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-800 transition-all"
+						onClick={handleOnClose}
+					>
 						<X className="w-4 h-4" />
 					</button>
 				</header>
