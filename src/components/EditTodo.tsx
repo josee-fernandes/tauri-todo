@@ -1,6 +1,6 @@
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { BackgroundOverlay } from './BackgroundOverlay'
@@ -12,15 +12,17 @@ interface IEditTodoProps {
 }
 
 export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) => {
-	const [title, setTitle] = useState(todo.title)
+	const [title] = useState(todo.title)
 	const [description, setDescription] = useState(todo.description)
-	const [date, setDate] = useState(todo.date)
+	const [date] = useState(todo.date)
+	const [completed, setCompleted] = useState(todo.completed)
 
-	const handleInitialFieldValues = useCallback((todo: ITodo) => {
-		setTitle(todo.title)
-		setDescription(todo.description)
-		setDate(todo.date)
-	}, [])
+	// const handleInitialFieldValues = useCallback((todo: ITodo) => {
+	// 	setTitle(todo.title)
+	// 	setDescription(todo.description)
+	// 	setDate(todo.date)
+	// 	setCompleted(todo.completed)
+	// }, [])
 
 	const handleOnClose = () => {
 		onClose()
@@ -34,6 +36,7 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) =>
 				...todo,
 				title,
 				description,
+				completed,
 				updatedAt: new Date().toISOString(),
 			}
 
@@ -52,9 +55,9 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) =>
 		setDescription(event.target.value)
 	}
 
-	useEffect(() => {
-		handleInitialFieldValues(todo)
-	}, [todo, handleInitialFieldValues])
+	const handleCompetedChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+		setCompleted(event.target.value === 'completed')
+	}
 
 	return (
 		// @ts-expect-error - className is not defined in the props
@@ -70,7 +73,14 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave }) =>
 					{/* TODO: Corrigir redução de 3 horas do GMT */}
 					<p>Data: {format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
 					<p>Última atualização: {format(new Date(todo.updatedAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
-
+					<select
+						className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 w-max"
+						value={completed ? 'completed' : 'pending'}
+						onChange={handleCompetedChange}
+					>
+						<option value="completed">Completo</option>
+						<option value="pending">Pendente</option>
+					</select>
 					<label className="flex flex-col gap-2">
 						<span>Descrição</span>
 						<textarea

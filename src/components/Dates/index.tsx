@@ -37,8 +37,6 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 			const target = event.target as HTMLElement
 			const isDraggable = target?.closest('button[data-draggable="true"]')
 
-			console.log({ isDraggable })
-
 			if (isDraggable) {
 				return false
 			}
@@ -145,13 +143,13 @@ interface IDatesProps {
 export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo }) => {
 	const mouseSensor = useSensor(MouseSensor, {
 		activationConstraint: {
-			delay: 10,
+			delay: 50,
 			tolerance: 5,
 		},
 	})
 	const touchSensor = useSensor(TouchSensor, {
 		activationConstraint: {
-			delay: 10,
+			delay: 50,
 			tolerance: 5,
 		},
 	})
