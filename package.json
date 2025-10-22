@@ -31,6 +31,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
+    "embla-carousel": "^8.6.0",
     "react-splide": "link:@types/@splidejs/react-splide",
     "tsconfig-paths": "^4.2.0",
     "typescript": "~5.8.3",

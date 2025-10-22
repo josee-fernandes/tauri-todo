@@ -33,6 +33,18 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 		slidesToScroll: 'auto',
 		loop: false,
 		watchSlides: false,
+		watchDrag: (_, event) => {
+			const target = event.target as HTMLElement
+			const isDraggable = target?.closest('button[data-draggable="true"]')
+
+			console.log({ isDraggable })
+
+			if (isDraggable) {
+				return false
+			}
+
+			return true
+		},
 	})
 
 	const activeTodo = useMemo(() => {
@@ -122,6 +134,8 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 	)
 }
 
+DatesC.displayName = 'DatesC'
+
 interface IDatesProps {
 	todos: ITodo[]
 	onUpdate: ({ updatedTodo }: { updatedTodo: ITodo }) => void
@@ -131,16 +145,21 @@ interface IDatesProps {
 export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo }) => {
 	const mouseSensor = useSensor(MouseSensor, {
 		activationConstraint: {
-			distance: 10,
+			delay: 10,
+			tolerance: 5,
 		},
 	})
 	const touchSensor = useSensor(TouchSensor, {
 		activationConstraint: {
-			distance: 10,
+			delay: 10,
+			tolerance: 5,
 		},
 	})
 
 	const [activeDraggableId, setActiveDraggableId] = useState<string | null>(null)
+
+	// https://deepwiki.com/search/eu-consigo-usar-off-para-desli_7cd2dcbd-2c69-4a13-b91d-2470ac951402?mode=fast
+	// https://chatgpt.com/c/68f695ea-c500-832b-91ad-ecee10ff807e
 
 	const sensors = useSensors(mouseSensor, touchSensor)
 	const days = getDaysInMonth(new Date())

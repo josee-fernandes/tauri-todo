@@ -10,7 +10,15 @@ export const Draggable: React.FC<IDraggableProps> = ({ children, id, onClick }) 
 	const { attributes, listeners, setNodeRef } = useDraggable({ id })
 
 	return (
-		<button ref={setNodeRef} type="button" className="w-full" {...listeners} {...attributes} onClick={onClick}>
+		<button
+			ref={setNodeRef}
+			type="button"
+			data-draggable="true"
+			className="w-full"
+			{...listeners}
+			{...attributes}
+			onClick={onClick}
+		>
 			{children}
 		</button>
 	)
