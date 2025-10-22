@@ -30,7 +30,7 @@ const today = new Date()
 const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, onEditTodo }) => {
 	const [emblaRef] = useEmblaCarousel({
 		startIndex: getDate(today) - 1,
-		slidesToScroll: 'auto',
+		dragFree: true,
 		loop: false,
 		watchSlides: false,
 		watchDrag: (_, event) => {
