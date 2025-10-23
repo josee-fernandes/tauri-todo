@@ -15,8 +15,8 @@ export const TitleBar: React.FC = () => {
 		appWindow.minimize()
 	}
 
-	const handleMaximize = () => {
-		appWindow.maximize()
+	const handleMaximize = async () => {
+		appWindow.toggleMaximize()
 	}
 
 	const handleClose = () => {

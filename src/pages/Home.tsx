@@ -1,7 +1,7 @@
 import * as path from '@tauri-apps/api/path'
 import { exists, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
 import clsx from 'clsx'
-import { format, formatISO } from 'date-fns'
+import { format } from 'date-fns'
 import { BookOpenText, Loader2, Plus, Save } from 'lucide-react'
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { toast } from 'sonner'

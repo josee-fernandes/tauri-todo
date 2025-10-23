@@ -98,7 +98,7 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 						emblaRef(node)
 						emblaRefElement.current = node
 					}}
-					className="embla__viewport overflow-hidden h-full"
+					className="embla__viewport overflow-hidden h-full max-h-[576px]"
 				>
 					<div className="embla__container flex gap-2 h-full">
 						{Object.keys(droppables).map((id) => (
