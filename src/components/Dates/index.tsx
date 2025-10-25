@@ -13,6 +13,7 @@ import clsx from 'clsx'
 import { format, formatISO, getDate, getDaysInMonth, setDate } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import useEmblaCarousel from 'embla-carousel-react'
+import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures'
 import { Plus } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -30,22 +31,25 @@ interface IDatesCProps {
 const today = new Date()
 
 const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, onEditTodo, onCreateNewTodo }) => {
-	const [emblaRef] = useEmblaCarousel({
-		startIndex: getDate(today) - 1,
-		dragFree: true,
-		loop: false,
-		watchSlides: false,
-		watchDrag: (_, event) => {
-			const target = event.target as HTMLElement
-			const isDraggable = target?.closest('button[data-draggable="true"]')
+	const [emblaRef, emblaApi] = useEmblaCarousel(
+		{
+			startIndex: getDate(today) - 1,
+			dragFree: true,
+			loop: false,
+			watchSlides: false,
+			watchDrag: (_, event) => {
+				const target = event.target as HTMLElement
+				const isDraggable = target?.closest('button[data-draggable="true"]')
 
-			if (isDraggable) {
-				return false
-			}
+				if (isDraggable) {
+					return false
+				}
 
-			return true
+				return true
+			},
 		},
-	})
+		[WheelGesturesPlugin({ forceWheelAxis: 'y' })],
+	)
 
 	const activeTodo = useMemo(() => {
 		return todos.find((todo) => todo.id === activeDraggableId)
@@ -72,6 +76,12 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 			}
 		}
 	}, [activeDraggableId])
+
+	useEffect(() => {
+		if (emblaApi) {
+			console.log({ ap: emblaApi.plugins() })
+		}
+	}, [emblaApi])
 
 	return (
 		<div className="flex-1 text-white flex gap-4 overflow-x-auto">
@@ -141,7 +151,11 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 										<button
 											type="button"
 											className="w-full group-hover:opacity-100 opacity-0 transition-all"
-											onClick={() => handleCreateNewTodo({ date: id })}
+											onClick={() =>
+												handleCreateNewTodo({
+													date: id,
+												})
+											}
 										>
 											<p
 												className={clsx(
