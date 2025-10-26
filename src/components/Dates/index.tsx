@@ -10,7 +10,7 @@ import {
 	useSensors,
 } from '@dnd-kit/core'
 import clsx from 'clsx'
-import { format, formatISO, getDate, getDaysInMonth, setDate } from 'date-fns'
+import { format, formatISO, getDate, getDaysInMonth, isSameMonth, setDate } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import useEmblaCarousel from 'embla-carousel-react'
 import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures'
@@ -22,18 +22,26 @@ import { Droppable } from './Droppable'
 
 interface IDatesCProps {
 	activeDraggableId: UniqueIdentifier | null
-	droppables: Record<string, ITodo[]>
+	droppables: Record<string, { date: Date; data: ITodo[] }>
 	todos: ITodo[]
+	isCurrentMonth: boolean
 	onEditTodo: (id: string) => void
 	onCreateNewTodo: ({ date }: { date: Date }) => void
 }
 
 const today = new Date()
 
-const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, onEditTodo, onCreateNewTodo }) => {
-	const [emblaRef, emblaApi] = useEmblaCarousel(
+const DatesC: React.FC<IDatesCProps> = ({
+	activeDraggableId,
+	droppables,
+	todos,
+	isCurrentMonth,
+	onEditTodo,
+	onCreateNewTodo,
+}) => {
+	const [emblaRef] = useEmblaCarousel(
 		{
-			startIndex: getDate(today) - 1,
+			startIndex: isCurrentMonth ? getDate(today) - 1 : 0,
 			dragFree: true,
 			loop: false,
 			watchSlides: false,
@@ -110,21 +118,21 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 								<Droppable id={id}>
 									<p
 										className={clsx('text-sm text-zinc-500', {
-											'!text-blue-500': formatISO(setDate(today, Number(id))) === formatISO(today.toISOString()),
+											'!text-blue-500': formatISO(droppables[id].date) === formatISO(today),
 										})}
 									>
-										{format(setDate(today, Number(id)), 'EEEE', { locale: ptBR })}
+										{format(droppables[id].date, 'EEEE', { locale: ptBR })}
 									</p>
-									<p className="font-bold mb-1">{format(setDate(today, Number(id)), 'dd/MM')}</p>
+									<p className="font-bold mb-1">{format(droppables[id].date, 'dd/MM')}</p>
 									<div className="group flex flex-col gap-1 w-full h-full overflow-y-auto overflow-x-hidden p-2">
 										<div className="opacity-0 w-full"></div>
-										{droppables[id].length === 0 && (
+										{droppables[id].data.length === 0 && (
 											<p className="h-[50px] w-full  text-gray-500 flex items-center justify-center rounded-lg">
 												Nenhum item
 											</p>
 										)}
 
-										{droppables[id].map((todo) =>
+										{droppables[id].data.map((todo: ITodo) =>
 											activeDraggableId === todo.id ? null : (
 												<Draggable key={todo.id} id={todo.id} onClick={() => handleEditTodo(todo.id)}>
 													<p
@@ -180,43 +188,40 @@ interface IDatesProps {
 	onCreateNewTodo: ({ date }: { date: Date }) => void
 }
 
+const updateDroppables = (days: number, todos: ITodo[], date: Date) => {
+	const memo: Record<string, { date: Date; data: ITodo[] }> = {}
+
+	for (let day = 1; day <= days; day++) {
+		memo[day.toString()] = {
+			date: setDate(date, day),
+			data: todos.filter((todo) => getDate(new Date(todo.date)) === Number(day)),
+		}
+	}
+
+	return memo
+}
+
+const activationConstraint = {
+	delay: 100,
+	tolerance: 5,
+}
+
 export const Dates: React.FC<IDatesProps> = ({ todos, date, onUpdate, onEditTodo, onCreateNewTodo }) => {
-	const mouseSensor = useSensor(MouseSensor, {
-		activationConstraint: {
-			delay: 100,
-			tolerance: 5,
-		},
-	})
-	const touchSensor = useSensor(TouchSensor, {
-		activationConstraint: {
-			delay: 100,
-			tolerance: 5,
-		},
-	})
+	const mouseSensor = useSensor(MouseSensor, { activationConstraint })
+	const touchSensor = useSensor(TouchSensor, { activationConstraint })
+	const sensors = useSensors(mouseSensor, touchSensor)
 
 	const [activeDraggableId, setActiveDraggableId] = useState<string | null>(null)
 
-	// https://deepwiki.com/search/eu-consigo-usar-off-para-desli_7cd2dcbd-2c69-4a13-b91d-2470ac951402?mode=fast
-	// https://chatgpt.com/c/68f695ea-c500-832b-91ad-ecee10ff807e
+	const days = useMemo(() => getDaysInMonth(date), [date])
+	const isCurrentMonth = useMemo(() => isSameMonth(date, today), [date])
 
-	const sensors = useSensors(mouseSensor, touchSensor)
-	const days = getDaysInMonth(date)
-	const initialDroppables = new Array(days)
-		.fill(0)
-		.map((_, index) => index + 1)
-		.map((day) => day.toString())
-		.reduce(
-			(acc, day) => {
-				acc[day] = todos.filter((todo) => getDate(new Date(todo.date)) === Number(day))
-				return acc
-			},
-			{} as Record<string, ITodo[]>,
-		)
-
-	const [droppables, setDroppables] = useState<Record<string, ITodo[]>>(initialDroppables)
+	const [droppables, setDroppables] = useState<Record<string, { date: Date; data: ITodo[] }>>(
+		updateDroppables(days, todos, date),
+	)
 
 	const findContainer = (id: string): string | undefined => {
-		return Object.keys(droppables).find((key) => droppables[key].some((todo) => todo.id === id))
+		return Object.keys(droppables).find((key) => droppables[key].data.some((todo) => todo.id === id)) ?? undefined
 	}
 
 	const handleDragStart = (event: DragStartEvent) => {
@@ -225,6 +230,7 @@ export const Dates: React.FC<IDatesProps> = ({ todos, date, onUpdate, onEditTodo
 
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event
+
 		if (!over) {
 			setActiveDraggableId(null)
 			return
@@ -242,11 +248,17 @@ export const Dates: React.FC<IDatesProps> = ({ todos, date, onUpdate, onEditTodo
 			const next = { ...prev }
 
 			if (sourceId) {
-				next[sourceId] = next[sourceId].filter((todo) => todo.id !== active.id.toString())
+				next[sourceId] = {
+					...next[sourceId],
+					data: next[sourceId].data.filter((todo) => todo.id !== active.id.toString()),
+				}
 			}
 
-			if (!next[targetId]) next[targetId] = []
-			next[targetId] = [...next[targetId], todos.find((todo) => todo.id === active.id.toString()) as ITodo]
+			if (!next[targetId]) next[targetId] = { date: setDate(date, Number(targetId)), data: [] }
+			next[targetId] = {
+				...next[targetId],
+				data: [...next[targetId].data, todos.find((todo) => todo.id === active.id.toString()) as ITodo],
+			}
 
 			return next
 		})
@@ -266,20 +278,8 @@ export const Dates: React.FC<IDatesProps> = ({ todos, date, onUpdate, onEditTodo
 	}
 
 	useEffect(() => {
-		const newDroppables = new Array(days)
-			.fill(0)
-			.map((_, index) => index + 1)
-			.map((day) => day.toString())
-			.reduce(
-				(acc, day) => {
-					acc[day] = todos.filter((todo) => getDate(new Date(todo.date)) === Number(day))
-					return acc
-				},
-				{} as Record<string, ITodo[]>,
-			)
-
-		setDroppables(newDroppables)
-	}, [todos, days])
+		setDroppables(updateDroppables(days, todos, date))
+	}, [todos, days, date])
 
 	return (
 		<DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -294,6 +294,7 @@ export const Dates: React.FC<IDatesProps> = ({ todos, date, onUpdate, onEditTodo
 					activeDraggableId={activeDraggableId}
 					droppables={droppables}
 					todos={todos}
+					isCurrentMonth={isCurrentMonth}
 					onEditTodo={onEditTodo}
 					onCreateNewTodo={onCreateNewTodo}
 				/>
