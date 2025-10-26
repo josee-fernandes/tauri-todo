@@ -10,6 +10,21 @@ import { Container } from '@/components/Container'
 import { Dates } from '@/components/Dates'
 import { EditTodo } from '@/components/EditTodo'
 
+const MONTHS = [
+	new Date(new Date().setMonth(0)),
+	new Date(new Date().setMonth(1)),
+	new Date(new Date().setMonth(2)),
+	new Date(new Date().setMonth(3)),
+	new Date(new Date().setMonth(4)),
+	new Date(new Date().setMonth(5)),
+	new Date(new Date().setMonth(6)),
+	new Date(new Date().setMonth(7)),
+	new Date(new Date().setMonth(8)),
+	new Date(new Date().setMonth(9)),
+	new Date(new Date().setMonth(10)),
+	new Date(new Date().setMonth(11)),
+] as const
+
 export const Home: React.FC = () => {
 	const [todos, setTodos] = useState<ITodo[]>([])
 	const [title, setTitle] = useState('')
@@ -209,7 +224,7 @@ export const Home: React.FC = () => {
 						</button>
 					</div>
 				</div>
-				<form className="flex flex-col gap-2 mt-6" onSubmit={handleSubmit}>
+				{/* <form className="flex flex-col gap-2 mt-6" onSubmit={handleSubmit}>
 					<header>
 						<h2 className="text-2xl font-bold">Adicionar tarefa</h2>
 					</header>
@@ -232,9 +247,9 @@ export const Home: React.FC = () => {
 							Adicionar
 						</button>
 					</div>
-				</form>
+				</form> */}
 				<div className="mt-6 flex flex-col gap-2 flex-1">
-					<header className="flex items-center justify-between">
+					{/* <header className="flex items-center justify-between">
 						<h2 className="text-2xl font-bold">Tarefas</h2>
 						<div className="flex items-center gap-2">
 							<span>{filteredTodos.length} tarefas</span>
@@ -245,13 +260,23 @@ export const Home: React.FC = () => {
 								onChange={handleSelectedDateChange}
 							/>
 						</div>
-					</header>
-					<Dates
-						todos={todos}
-						onUpdate={onSaveEditTodo}
-						onEditTodo={handleEditTodo}
-						onCreateNewTodo={onCreateNewTodo}
-					/>
+					</header> */}
+					<div className="flex flex-col gap-10">
+						{MONTHS.map((month) => {
+							const filteredTodosByMonth = todos.filter((todo) => new Date(todo.date).getMonth() === month.getMonth())
+
+							return (
+								<Dates
+									key={month.toISOString()}
+									todos={filteredTodosByMonth}
+									date={month}
+									onUpdate={onSaveEditTodo}
+									onEditTodo={handleEditTodo}
+									onCreateNewTodo={onCreateNewTodo}
+								/>
+							)
+						})}
+					</div>
 					{/* day view */}
 					{/* <ul className="flex flex-col gap-2 ">
 						{filteredTodos.map((todo) => (

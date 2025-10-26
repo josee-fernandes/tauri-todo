@@ -77,12 +77,6 @@ const DatesC: React.FC<IDatesCProps> = ({ activeDraggableId, droppables, todos, 
 		}
 	}, [activeDraggableId])
 
-	useEffect(() => {
-		if (emblaApi) {
-			console.log({ ap: emblaApi.plugins() })
-		}
-	}, [emblaApi])
-
 	return (
 		<div className="flex-1 text-white flex gap-4 overflow-x-auto">
 			<DragOverlay>
@@ -180,12 +174,13 @@ DatesC.displayName = 'DatesC'
 
 interface IDatesProps {
 	todos: ITodo[]
+	date: Date
 	onUpdate: ({ updatedTodo }: { updatedTodo: ITodo }) => void
 	onEditTodo: (id: string) => void
 	onCreateNewTodo: ({ date }: { date: Date }) => void
 }
 
-export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo, onCreateNewTodo }) => {
+export const Dates: React.FC<IDatesProps> = ({ todos, date, onUpdate, onEditTodo, onCreateNewTodo }) => {
 	const mouseSensor = useSensor(MouseSensor, {
 		activationConstraint: {
 			delay: 100,
@@ -205,7 +200,7 @@ export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo, onCr
 	// https://chatgpt.com/c/68f695ea-c500-832b-91ad-ecee10ff807e
 
 	const sensors = useSensors(mouseSensor, touchSensor)
-	const days = getDaysInMonth(new Date())
+	const days = getDaysInMonth(date)
 	const initialDroppables = new Array(days)
 		.fill(0)
 		.map((_, index) => index + 1)
@@ -288,13 +283,21 @@ export const Dates: React.FC<IDatesProps> = ({ todos, onUpdate, onEditTodo, onCr
 
 	return (
 		<DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-			<DatesC
-				activeDraggableId={activeDraggableId}
-				droppables={droppables}
-				todos={todos}
-				onEditTodo={onEditTodo}
-				onCreateNewTodo={onCreateNewTodo}
-			/>
+			<div className="flex flex-col gap-2">
+				<div className="flex items-center justify-between">
+					<h1 className="text-2xl font-bold capitalize">{format(date, 'MMMM yyyy', { locale: ptBR })}</h1>
+					<div>
+						<span>{todos.length} tarefas</span>
+					</div>
+				</div>
+				<DatesC
+					activeDraggableId={activeDraggableId}
+					droppables={droppables}
+					todos={todos}
+					onEditTodo={onEditTodo}
+					onCreateNewTodo={onCreateNewTodo}
+				/>
+			</div>
 		</DndContext>
 	)
 }
