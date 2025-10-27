@@ -1,76 +1,43 @@
 import * as path from '@tauri-apps/api/path'
 import { exists, mkdir, readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
 import clsx from 'clsx'
-import { format } from 'date-fns'
-import { BookOpenText, Loader2, Plus, Save } from 'lucide-react'
-import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { getMonth } from 'date-fns'
+import { BookOpenText, Columns, LayoutGrid, Loader2, Save } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { v4 as uuidv4 } from 'uuid'
-import { Container } from '@/components/Container'
-import { Dates } from '@/components/Dates'
-import { EditTodo } from '@/components/EditTodo'
 
-const MONTHS = [
-	new Date(new Date().setMonth(0)),
-	new Date(new Date().setMonth(1)),
-	new Date(new Date().setMonth(2)),
-	new Date(new Date().setMonth(3)),
-	new Date(new Date().setMonth(4)),
-	new Date(new Date().setMonth(5)),
-	new Date(new Date().setMonth(6)),
-	new Date(new Date().setMonth(7)),
-	new Date(new Date().setMonth(8)),
-	new Date(new Date().setMonth(9)),
-	new Date(new Date().setMonth(10)),
-	new Date(new Date().setMonth(11)),
-] as const
+import { Container } from '@/components/Container'
+import { EditTodo } from '@/components/EditTodo'
+import { MonthDays } from '@/components/MonthDays'
+import { Months } from '@/components/Months'
+import { ViewButton } from '@/components/ViewButton'
 
 export const Home: React.FC = () => {
 	const [todos, setTodos] = useState<ITodo[]>([])
-	const [title, setTitle] = useState('')
 	const [saveStatus, setSaveStatus] = useState<'idle' | 'unsaved' | 'saving' | 'saved' | 'error'>('idle')
-	const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'))
-	const [filteredTodos, setFilteredTodos] = useState<ITodo[]>([])
+	const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
+	const [selectedView, setSelectedView] = useState<'year' | 'month' | 'day'>('month')
 	const [editingTodoId, setEditingTodoId] = useState<string | null>(null)
 
 	const editingTodo = useMemo(() => todos.find((todo) => todo.id === editingTodoId), [todos, editingTodoId])
-
-	const titleInputId = useId()
-
-	const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setTitle(event.target.value)
-	}
-
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault()
-
-		try {
-			const newTodo: ITodo = {
-				id: uuidv4(),
-				title,
-				description: '',
-				completed: false,
-				date: new Date(`${selectedDate}T00:00:00.000`).toISOString(),
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-			}
-
-			setTodos((prevTodos) => [...prevTodos, newTodo])
-
-			setTitle('')
-
-			setSaveStatus('unsaved')
-		} catch (error) {
-			toast.error('Erro ao adicionar tarefa', {
-				description: error instanceof Error ? error.message : String(error),
-			})
-		}
-	}
+	const filteredTodos = useMemo(
+		() => todos.filter((todo) => getMonth(new Date(todo.date)) === selectedMonth),
+		[selectedMonth, todos],
+	)
 
 	// const handleCompleteTodo = (id: string) => {
 	// 	setTodos((prevTodos) => prevTodos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)))
 	// 	setSaveStatus('unsaved')
 	// }
+
+	const handleSelectMonthView = () => {
+		setSelectedView('month')
+	}
+
+	const handleSelectYearView = () => {
+		setSelectedView('year')
+	}
 
 	const handleDeleteTodo = (id: string) => {
 		setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id))
@@ -137,10 +104,6 @@ export const Home: React.FC = () => {
 		}
 	}
 
-	const handleSelectedDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setSelectedDate(event.target.value)
-	}
-
 	const handleEditTodo = (id: string) => {
 		setEditingTodoId(id)
 	}
@@ -180,15 +143,15 @@ export const Home: React.FC = () => {
 		}
 	}
 
+	const updateSelectedMonth = (monthId: number) => {
+		setSelectedMonth(monthId)
+
+		handleSelectMonthView()
+	}
+
 	useEffect(() => {
 		handleLoadTodos()
 	}, [handleLoadTodos])
-
-	useEffect(() => {
-		if (todos.length > 0) {
-			setFilteredTodos(todos.filter((todo) => new Date(todo.date).toISOString().split('T')[0] === selectedDate))
-		}
-	}, [selectedDate, todos])
 
 	return (
 		<div className="relative w-full flex-1 overflow-x-hidden">
@@ -224,112 +187,30 @@ export const Home: React.FC = () => {
 						</button>
 					</div>
 				</div>
-				{/* <form className="flex flex-col gap-2 mt-6" onSubmit={handleSubmit}>
-					<header>
-						<h2 className="text-2xl font-bold">Adicionar tarefa</h2>
-					</header>
-					<div className="flex gap-2">
-						<div className="flex-1 flex gap-2 items-center">
-							<label htmlFor={titleInputId}>Nome da tarefa</label>
-							<input
-								id={titleInputId}
-								type="text"
-								className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 flex-1"
-								value={title}
-								onChange={handleTitleChange}
-							/>
-						</div>
-						<button
-							type="submit"
-							className="bg-blue-500 hover:bg-blue-600 font-semibold text-white rounded-lg py-2 px-4 transition-all cursor-pointer w-full max-w-32 flex items-center gap-2"
-						>
-							<Plus className="w-4 h-4" />
-							Adicionar
-						</button>
-					</div>
-				</form> */}
+				<div className="flex items-center gap-2">
+					<p>View:</p>
+					<ViewButton className="flex items-center gap-2" onClick={handleSelectYearView}>
+						<LayoutGrid className="w-4 h-4" />
+						Months
+					</ViewButton>
+					<ViewButton className="flex items-center gap-2" onClick={handleSelectMonthView}>
+						<Columns className="w-4 h-4" />
+						Days
+					</ViewButton>
+				</div>
 				<div className="mt-6 flex flex-col gap-2 flex-1">
-					{/* <header className="flex items-center justify-between">
-						<h2 className="text-2xl font-bold">Tarefas</h2>
-						<div className="flex items-center gap-2">
-							<span>{filteredTodos.length} tarefas</span>
-							<input
-								type="date"
-								className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 text-zinc-950 dark:text-zinc-50"
-								value={selectedDate}
-								onChange={handleSelectedDateChange}
+					{selectedView === 'year' && <Months updateSelectedMonth={updateSelectedMonth} />}
+					{selectedView === 'month' && (
+						<div className="flex flex-col gap-10 animate-opacity-in">
+							<MonthDays
+								todos={filteredTodos}
+								month={selectedMonth}
+								onUpdate={onSaveEditTodo}
+								onEditTodo={handleEditTodo}
+								onCreateNewTodo={onCreateNewTodo}
 							/>
 						</div>
-					</header> */}
-					<div className="flex flex-col gap-10">
-						{MONTHS.map((month) => {
-							const filteredTodosByMonth = todos.filter((todo) => new Date(todo.date).getMonth() === month.getMonth())
-
-							return (
-								<Dates
-									key={month.toISOString()}
-									todos={filteredTodosByMonth}
-									date={month}
-									onUpdate={onSaveEditTodo}
-									onEditTodo={handleEditTodo}
-									onCreateNewTodo={onCreateNewTodo}
-								/>
-							)
-						})}
-					</div>
-					{/* day view */}
-					{/* <ul className="flex flex-col gap-2 ">
-						{filteredTodos.map((todo) => (
-							<li
-								key={todo.id}
-								className={clsx(
-									'group flex items-center gap-2 justify-between px-4 py-2 rounded-lg border',
-									{
-										'bg-emerald-200 dark:bg-emerald-900 border-emerald-500 text-emerald-500': todo.completed,
-									},
-									{
-										'bg-zinc-100 dark:bg-zinc-900 border-zinc-600 dark:border-zinc-800 text-zinc-600 dark:text-zinc-50':
-											!todo.completed,
-									},
-								)}
-							>
-								<span className={clsx('flex-1', todo.completed ? 'line-through' : '')}>{todo.title}</span>
-								<div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all">
-									<button
-										type="button"
-										className={clsx(
-											'rounded-lg p-2 transition-all cursor-pointer border',
-											{
-												'bg-zinc-300 dark:bg-zinc-900 hover:bg-zinc-500 border-zinc-500 text-zinc-500 hover:text-zinc-300':
-													todo.completed,
-											},
-											{
-												'bg-emerald-200 dark:bg-emerald-900 hover:bg-emerald-500 border-emerald-500 text-emerald-500 hover:text-emerald-200':
-													!todo.completed,
-											},
-										)}
-										onClick={() => handleCompleteTodo(todo.id)}
-									>
-										{todo.completed ? <Undo className="w-4 h-4" /> : <Check className="w-4 h-4" />}
-									</button>
-									<button
-										type="button"
-										className="rounded-lg p-2 transition-all cursor-pointer border bg-zinc-300 dark:bg-zinc-900 hover:bg-zinc-500 border-zinc-500 text-zinc-500 hover:text-zinc-300"
-										onClick={() => handleEditTodo(todo.id)}
-									>
-										<Pencil className="w-4 h-4" />
-									</button>
-									<button
-										type="button"
-										className="border bg-rose-200 dark:bg-rose-900 hover:bg-rose-500 border-rose-500 text-rose-500 hover:text-rose-200 rounded-lg p-2 transition-all cursor-pointer"
-										onClick={() => handleDeleteTodo(todo.id)}
-									>
-										<Trash className="w-4 h-4" />
-									</button>
-								</div>
-							</li>
-						))}
-					</ul> */}
+					)}
 				</div>
 			</Container>
 		</div>

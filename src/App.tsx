@@ -2,6 +2,7 @@ import { Toaster } from 'sonner'
 import { TitleBar } from '@/components/Window/TitleBar'
 
 import { Home } from '@/pages/Home'
+// import { Testing } from '@/pages/Testing'
 
 import '@/styles/index.css'
 
@@ -11,6 +12,7 @@ export const App = () => {
 			<Toaster richColors expand closeButton />
 			<TitleBar />
 			<Home />
+			{/* <Testing /> */}
 		</div>
 	)
 }
