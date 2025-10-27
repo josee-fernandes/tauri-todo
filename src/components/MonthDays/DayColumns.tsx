@@ -49,9 +49,7 @@ export const DayColumns: React.FC<IDayColumnsProps> = ({
 		[WheelGesturesPlugin({ forceWheelAxis: 'y' })],
 	)
 
-	const activeTodo = useMemo(() => {
-		return todos.find((todo) => todo.id === activeDraggableId)
-	}, [activeDraggableId, todos])
+	const activeTodo = useMemo(() => todos.find((todo) => todo.id === activeDraggableId), [activeDraggableId, todos])
 
 	const emblaRefElement = useRef<HTMLDivElement>(null)
 
@@ -82,7 +80,7 @@ export const DayColumns: React.FC<IDayColumnsProps> = ({
 					<Draggable id={activeDraggableId}>
 						<p
 							className={clsx(
-								'min-h-[50px] h-max w-full bg-blue-500 flex items-center justify-center p-2 rounded-lg cursor-grabbing',
+								'min-h-[50px] h-max w-full border-2 border-blue-400 bg-blue-500 flex items-center justify-center p-2 rounded-lg cursor-grabbing',
 								{
 									'bg-emerald-200 dark:bg-emerald-900 border-emerald-500 text-emerald-500': activeTodo?.completed,
 								},
@@ -100,11 +98,11 @@ export const DayColumns: React.FC<IDayColumnsProps> = ({
 						emblaRef(node)
 						emblaRefElement.current = node
 					}}
-					className="embla__viewport overflow-hidden h-full max-h-[576px]"
+					className="embla__viewport overflow-hidden h-full "
 				>
 					<div className="embla__container flex gap-2 h-full">
 						{Object.keys(droppables).map((id) => (
-							<div key={id} className="embla__slide min-w-60 w-60">
+							<div key={id} className="embla__slide w-60 flex-none h-[576px]">
 								<Droppable id={id}>
 									<p
 										className={clsx('text-sm text-zinc-500', {
@@ -127,7 +125,7 @@ export const DayColumns: React.FC<IDayColumnsProps> = ({
 												<Draggable key={todo.id} id={todo.id} onClick={() => handleEditTodo(todo.id)}>
 													<p
 														className={clsx(
-															'min-h-[50px] h-max w-full bg-blue-500 flex items-center justify-center p-2 rounded-lg cursor-pointer',
+															'min-h-[50px] h-max w-full border-2 border-blue-400 bg-blue-500 flex items-center justify-center p-2 rounded-lg cursor-pointer',
 															{
 																'bg-emerald-200 dark:bg-emerald-900 border-emerald-500 text-emerald-500':
 																	todo.completed,

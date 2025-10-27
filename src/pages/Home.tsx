@@ -188,7 +188,7 @@ export const Home: React.FC = () => {
 					</div>
 				</div>
 				<div className="flex items-center gap-2 mt-6">
-					<p>View:</p>
+					<p>Visualização:</p>
 					<ViewButton
 						className={clsx('flex items-center gap-2', {
 							'!text-blue-500 !border-blue-500 hover:!bg-blue-500/10': selectedView === 'year',
@@ -196,7 +196,7 @@ export const Home: React.FC = () => {
 						onClick={handleSelectYearView}
 					>
 						<LayoutGrid className="w-4 h-4" />
-						Months
+						Meses
 					</ViewButton>
 					<ViewButton
 						className={clsx('flex items-center gap-2', {
@@ -205,7 +205,7 @@ export const Home: React.FC = () => {
 						onClick={handleSelectMonthView}
 					>
 						<Columns className="w-4 h-4" />
-						Days
+						Dias
 					</ViewButton>
 				</div>
 				<div className="mt-6 flex flex-col gap-2 flex-1">

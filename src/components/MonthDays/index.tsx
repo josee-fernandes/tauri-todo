@@ -51,6 +51,7 @@ export const MonthDays: React.FC<IMonthDaysProps> = ({ todos, month, onUpdate, o
 	const date = useMemo(() => {
 		const d = new Date()
 		d.setMonth(month)
+
 		return d
 	}, [month])
 	const days = useMemo(() => getDaysInMonth(date), [date])

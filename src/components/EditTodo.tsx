@@ -1,9 +1,10 @@
-import { format } from 'date-fns'
+import { format, getDaysInMonth } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { X } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { BackgroundOverlay } from './BackgroundOverlay'
+import { IosPickerItem } from './EmblaCarouselIosPickerItem'
 
 interface IEditTodoProps {
 	todo: ITodo
@@ -18,6 +19,15 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 	const [date] = useState(todo.date)
 	const [completed, setCompleted] = useState(todo.completed)
 
+	const [selectedDay, setSelectedDay] = useState(new Date(date).getDate())
+	const [selectedMonth, setSelectedMonth] = useState(new Date(date).getMonth())
+	const days = useMemo(() => {
+		const d = new Date(date)
+		d.setMonth(selectedMonth)
+
+		return getDaysInMonth(d)
+	}, [date, selectedMonth])
+
 	const handleOnClose = () => {
 		onClose()
 	}
@@ -26,11 +36,14 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 
 	const handleOnSave = () => {
 		try {
+			const newDate = new Date(new Date(date).getFullYear(), selectedMonth, selectedDay + 1, 0, 0, 0, 0)
+
 			const updatedTodo: ITodo = {
 				...todo,
 				title,
 				description,
 				completed,
+				date: newDate.toISOString(),
 				updatedAt: new Date().toISOString(),
 			}
 
@@ -67,6 +80,14 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 		setCompleted(event.target.value === 'completed')
 	}
 
+	const handleSelectDay = (index: number) => {
+		setSelectedDay(index)
+	}
+
+	const handleSelectMonth = (index: number) => {
+		setSelectedMonth(index)
+	}
+
 	return (
 		// @ts-expect-error - className is not defined in the props
 		<BackgroundOverlay className="grid place-items-center animate-opacity-in">
@@ -89,6 +110,10 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 				<div className="flex flex-col gap-2 mt-4">
 					{/* TODO: Corrigir redução de 3 horas do GMT */}
 					<p>Data: {format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
+					<div className="embla embla-custom">
+						<IosPickerItem slideCount={days} perspective="left" loop={false} label="dia" onSelect={handleSelectDay} />
+						<IosPickerItem slideCount={12} perspective="right" loop={false} label="mês" onSelect={handleSelectMonth} />
+					</div>
 					<p>Última atualização: {format(new Date(todo.updatedAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
 					<select
 						className="border-2 border-zinc-300 dark:border-zinc-800 rounded-lg p-2 w-max"
