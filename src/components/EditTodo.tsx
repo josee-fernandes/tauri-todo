@@ -70,17 +70,17 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 	return (
 		// @ts-expect-error - className is not defined in the props
 		<BackgroundOverlay className="grid place-items-center animate-opacity-in">
-			<div className="max-w-3xl w-[90%] py-4 px-6 bg-zinc-950 border border-zinc-800 rounded-lg animate-delay-scale-in">
+			<div className="max-w-3xl w-[90%] py-4 px-6 bg-zinc-950 border-2 border-zinc-800 rounded-lg animate-delay-scale-in">
 				<header className="flex items-center justify-between gap-4">
 					<input
 						type="text"
-						className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 w-full"
+						className="border-2 border-zinc-300 dark:border-zinc-800 rounded-lg p-2 w-full"
 						value={title}
 						onChange={handleTitleChange}
 					/>
 					<button
 						type="button"
-						className="cursor-pointer border rounded-lg p-2 border-zinc-300 dark:border-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-800 transition-all"
+						className="cursor-pointer border-2 rounded-lg p-2 border-zinc-300 dark:border-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-800 transition-all"
 						onClick={handleOnClose}
 					>
 						<X className="w-4 h-4" />
@@ -91,7 +91,7 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 					<p>Data: {format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
 					<p>Última atualização: {format(new Date(todo.updatedAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
 					<select
-						className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 w-max"
+						className="border-2 border-zinc-300 dark:border-zinc-800 rounded-lg p-2 w-max"
 						value={completed ? 'completed' : 'pending'}
 						onChange={handleCompetedChange}
 					>
@@ -101,7 +101,7 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 					<label className="flex flex-col gap-2">
 						<span>Descrição</span>
 						<textarea
-							className="border border-zinc-300 dark:border-zinc-800 rounded-lg p-2 flex-1"
+							className="border-2 border-zinc-300 dark:border-zinc-800 rounded-lg p-2 flex-1"
 							value={description}
 							onChange={handleDescriptionChange}
 						/>
@@ -110,7 +110,7 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 				<footer className="flex items-center justify-end gap-2 mt-4">
 					<button
 						type="button"
-						className="border border-zinc-300 hover:border-zinc-500 font-semibold text-white rounded-lg py-2 px-4 transition-all cursor-pointer"
+						className="border-2 border-zinc-300 hover:border-zinc-500 font-semibold text-white rounded-lg py-2 px-4 transition-all cursor-pointer"
 						onClick={handleOnCancel}
 					>
 						Cancelar

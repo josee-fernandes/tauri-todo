@@ -15,7 +15,7 @@ export const Months: React.FC<IMonthsProps> = ({ updateSelectedMonth }) => {
 				<button
 					type="button"
 					key={month.id}
-					className="border border-zinc-300 dark:border-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-800 font-semibold text-zinc-950 dark:text-zinc-50 rounded-lg p-2 h-48 grid place-items-center cursor-pointer transition-all "
+					className="border-2 border-zinc-300 dark:border-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-800 font-semibold text-zinc-950 dark:text-zinc-50 rounded-lg p-2 h-48 grid place-items-center cursor-pointer transition-all "
 					onClick={() => handleSelectedMonth(month.id)}
 				>
 					<h3 className="text-zinc-950 dark:text-zinc-50 text-center capitalize">{month.name}</h3>

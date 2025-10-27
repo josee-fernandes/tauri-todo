@@ -12,7 +12,7 @@ export const ViewButton: React.FC<IViewButtonProps> = forwardRef<HTMLButtonEleme
 				ref={ref}
 				type="button"
 				className={clsx(
-					'border border-zinc-300 dark:border-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-800 font-semibold text-zinc-950 dark:text-zinc-50 rounded-lg p-3 transition-all cursor-pointer',
+					'border-2 border-zinc-300 dark:border-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-800 font-semibold text-zinc-950 dark:text-zinc-50 rounded-lg p-3 transition-all cursor-pointer',
 					className,
 				)}
 				{...props}
