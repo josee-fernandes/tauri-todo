@@ -111,8 +111,22 @@ export const EditTodo: React.FC<IEditTodoProps> = ({ todo, onClose, onSave, onDe
 					{/* TODO: Corrigir redução de 3 horas do GMT */}
 					<p>Data: {format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
 					<div className="embla embla-custom">
-						<IosPickerItem slideCount={days} perspective="left" loop={false} label="dia" onSelect={handleSelectDay} />
-						<IosPickerItem slideCount={12} perspective="right" loop={false} label="mês" onSelect={handleSelectMonth} />
+						<IosPickerItem
+							slideCount={days}
+							perspective="left"
+							loop={false}
+							label="dia"
+							initialIndex={selectedDay - 1}
+							onSelect={handleSelectDay}
+						/>
+						<IosPickerItem
+							slideCount={12}
+							perspective="right"
+							loop={false}
+							label="mês"
+							initialIndex={selectedMonth}
+							onSelect={handleSelectMonth}
+						/>
 					</div>
 					<p>Última atualização: {format(new Date(todo.updatedAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}</p>
 					<select

@@ -1,7 +1,7 @@
 import type { EmblaCarouselType } from 'embla-carousel'
 import useEmblaCarousel from 'embla-carousel-react'
 import type React from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import '@/styles/embla.css'
 
@@ -65,10 +65,11 @@ type PropType = {
 	label: string
 	slideCount: number
 	perspective: 'left' | 'right'
+	initialIndex: number
 	onSelect: (index: number) => void
 }
 
-export const IosPickerItem: React.FC<PropType> = ({ onSelect, ...props }) => {
+export const IosPickerItem: React.FC<PropType> = ({ onSelect, initialIndex, ...props }) => {
 	const { slideCount, perspective, label, loop = false } = props
 	const [emblaRef, emblaApi] = useEmblaCarousel({
 		loop,
@@ -106,6 +107,16 @@ export const IosPickerItem: React.FC<PropType> = ({ onSelect, ...props }) => {
 	)
 
 	useEffect(() => {
+		if (emblaApi) {
+			const { scrollTo } = emblaApi.internalEngine()
+
+			console.log({ initialIndex })
+
+			scrollTo.index(initialIndex, 1)
+		}
+	}, [emblaApi, initialIndex])
+
+	useEffect(() => {
 		if (!emblaApi) return
 
 		emblaApi.on('pointerUp', (emblaApi) => {
@@ -139,7 +150,7 @@ export const IosPickerItem: React.FC<PropType> = ({ onSelect, ...props }) => {
 				>
 					<div className="embla__ios-picker__container">
 						{slides.map((_, index) => (
-							<div className="embla__ios-picker__slide" key={index}>
+							<div className="embla__ios-picker__slide" key={String(index)}>
 								{index}
 							</div>
 						))}

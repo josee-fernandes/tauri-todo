@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { MONTHS } from '@/constants/date'
 
 export const Testing: React.FC = () => {
